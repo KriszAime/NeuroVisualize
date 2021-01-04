@@ -11,31 +11,36 @@ typedef unsigned char byte;
 //-
 typedef enum NeuralNet_WH_type
 {
-	random,
-	constant
+	NNtypeRandom,
+	NNtypeConstant
 }NeuralNet_WH_type;
 //-
 
 //-Structs
 typedef	struct NeuralNet
 {
-	int tmp;
-	struct Layers
+	struct
 	{
-		struct Input
+		float** Inputs;
+		float** Targets;
+	}Patterns;
+	struct
+	{
+		struct  //Input - Hidden Weights
 		{
-			int a;
-		};
-		struct Hidden
+			float **DeltaWeight, **Weight; //[input][hidden]
+			struct  { uint Icount, Hcount; }Count;
+		}IH;
+		struct  // Hidden - Output Weights
 		{
-			int b;
-		};
-		struct Output
-		{
-			int c;
-		};
-	};
-	
+			float **DeltaWeight, **Weight; //[output][hidden]
+			struct  { uint Hcount, Ocount; }Count;
+		}HO;
+	}Weights;
+	struct 
+	{
+		float eta, alpha, smallwt;
+	}Settings;
 }NeuralNet;
 //-
 

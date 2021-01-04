@@ -14,7 +14,7 @@ by: KriszAime
 
 
 //const
-#define Refresh_FPS 60.0f //period: 16.66ms
+#define Refresh_FPS 30.0f //period: 33.33ms
 #define Window_height 600
 #define Window_width 800
 //
@@ -30,6 +30,7 @@ typedef struct Window
 	sfTexture* texture; //will be linked to sprite
 	sfImage* image; //will be copy to texture
 	sfIntRect canvas_bounds;
+	sfClock *RenderClock;
 }Window;
 
 //
@@ -60,13 +61,22 @@ void main(void)
 
 
 	//Setup Neuro Network
-	
+	NeuralNet Nnet;
+	//todo input from user + disclaimer
+	//
+
+	//Create Neuro Network
+	NeuralNet_Construct(&Nnet, 4, 0.5f, 0.9f, 0.5f, NNtypeRandom);
 	//
 
 
 	//Create Main Window
 	if ((Main_Window.render = sfRenderWindow_create(Main_Window.mode, "Neuro Visualize V0.1a by: KriszAime", sfClose, NULL)) == NULL) return;
 	//
+
+	//-Start Clock
+	Main_Window.RenderClock = sfClock_create();
+	//-
 
 	//Main refresh loop
 	while (sfRenderWindow_isOpen(Main_Window.render))
@@ -100,7 +110,7 @@ void main(void)
 			//-
 
 			//- Draw Output Activity
-
+			
 			//-
 
 			//- Draw Training Points
@@ -114,6 +124,13 @@ void main(void)
 		sfTexture_updateFromImage(Main_Window.texture, Main_Window.image, 0, 0);
 		sfRenderWindow_drawSprite(Main_Window.render, Main_Window.sprite, NULL); //draw render <= sprite
 		sfRenderWindow_display(Main_Window.render); //update render window
+		//-
+
+		//-Target Fps
+		sfInt64 Delta = sfTime_asMicroseconds(sfClock_getElapsedTime(Main_Window.RenderClock));
+		if (Delta < ((1. / Refresh_FPS) * 1000 * 1000)) sfSleep((sfTime){ .microseconds = ((1. / Refresh_FPS) * 1000 * 1000) - Delta });
+		sfClock_restart(Main_Window.RenderClock);
+		
 		//-
 	}
 	//
