@@ -14,7 +14,7 @@ by: KriszAime
 
 
 //const
-#define Refresh_FPS 30.0f //period: 33.33ms
+#define Refresh_FPS 30.0 //period: 33.33ms
 #define Window_height 600
 #define Window_width 800
 //
@@ -65,8 +65,11 @@ void main(void)
 	//todo input from user + disclaimer
 	//
 
-	//Create Neuro Network
-	NeuralNet_Construct(&Nnet, 4, 0.5f, 0.9f, 0.5f, NNtypeRandom);
+	//Create Neuro Network (test for now)
+	float TestInput[4][2] = { {0, 0},  {1, 0},  {0, 1},  {1, 1} };
+	float TestTarget[4][1] = { {0},		{1},	{1},	{0} };
+	NeuralNet_Construct(&Nnet, 2u, 2u, 1u, 0.5f, 0.9f, 0.5f, NNtypeRandom);
+	for (int i = 0; i < 4;i++)NeuralNet_addTrainingPattern(&Nnet, TestInput[i], TestTarget[i]);
 	//
 
 
@@ -128,7 +131,7 @@ void main(void)
 
 		//-Target Fps
 		sfInt64 Delta = sfTime_asMicroseconds(sfClock_getElapsedTime(Main_Window.RenderClock));
-		if (Delta < ((1. / Refresh_FPS) * 1000 * 1000)) sfSleep((sfTime){ .microseconds = ((1. / Refresh_FPS) * 1000 * 1000) - Delta });
+		if (Delta < ((1. / Refresh_FPS) * 1000 * 1000)) sfSleep((sfTime){ .microseconds = ((1. / Refresh_FPS) * 1000. * 1000.) - (double)Delta});
 		sfClock_restart(Main_Window.RenderClock);
 		
 		//-

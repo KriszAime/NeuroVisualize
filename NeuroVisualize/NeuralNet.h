@@ -21,25 +21,46 @@ typedef	struct NeuralNet
 {
 	struct
 	{
-		float** Inputs;
-		float** Targets;
+		float** Inputs; //[pattern][input]
+		float** Targets; //[pattern][target]
+		uint PatternCount;
 	}Patterns;
 	struct
 	{
 		struct  //Input - Hidden Weights
 		{
-			float **DeltaWeight, **Weight; //[input][hidden]
-			struct  { uint Icount, Hcount; }Count;
+			float** Weight; //[input][hidden]
 		}IH;
 		struct  // Hidden - Output Weights
 		{
-			float **DeltaWeight, **Weight; //[output][hidden]
-			struct  { uint Hcount, Ocount; }Count;
+			float** Weight; //[output][hidden]
 		}HO;
 	}Weights;
 	struct 
 	{
+		struct
+		{
+			float** Hidden; //[pattern][hidden]
+			float** Output; //[pattern][output]
+		}Sum;
+		struct 
+		{
+			float** Hidden; //[pattern][hidden]
+			float** Output; //[pattern][output]
+		}Values;
+	}Points;
+	struct
+	{
+		float* Hidden; //[hidden]
+		float* Output; //[output]
+		float* SumOutputWeight; //[hidden]
+		float** WeightIH; //[input][hidden]
+		float** WeightHO; //[output][hidden]
+	}Deltas; //
+	struct 
+	{
 		float eta, alpha, smallwt;
+		struct { uint Icount, Hcount, Ocount; }NeuronCount;
 	}Settings;
 }NeuralNet;
 //-
@@ -48,18 +69,20 @@ typedef	struct NeuralNet
 
 //-Methods
 
-//Setup Alapértelmezett 1 bemenetes, 1 kimenetes. xy Hidden nodes. (minimum of 1)
-void NeuralNet_Construct(NeuralNet* _nnet, uint _hiddenCount, float _eta, float _alpha, float _smallwt, NeuralNet_WH_type _whtype);
+//Setup Network & nodes. (minimum of 1)
+void NeuralNet_Construct(NeuralNet* _nnet, uint _InputCount, uint _hiddenCount, uint _OutputCount, float _eta, float _alpha, float _smallwt, NeuralNet_WH_type _whtype);
 void NeuralNet_Destruct(NeuralNet* _nnet);
 
-//Adds a new training pair to Training vector.
-void NeuralNet_addTrainingPoint(NeuralNet* _nnet, float input, float output);
+/*Adds a new training pair to Training vector.
+* input & output values copied internally
+*/
+void NeuralNet_addTrainingPattern(NeuralNet* _nnet, float* inputs, float* outputs);
 
 //Visszatér az utolsó epoch error - értékével.
 float NeuralNet_doEpoch(NeuralNet* _nnet, uint _times);
 
 //Visszatér a jelenlegi Súlyok neurális kimenetével.
-float NeuralNet_getOutputActivation(NeuralNet* _nnet, float _input);
+float* NeuralNet_getOutputActivation(NeuralNet* _nnet, float* _inputs);
 
 //-
 
