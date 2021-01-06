@@ -8,58 +8,57 @@ typedef unsigned long ulong;
 typedef unsigned char byte;
 //-
 
-//-
-typedef enum NeuralNet_WH_type
-{
-	NNtypeRandom,
-	NNtypeConstant
-}NeuralNet_WH_type;
-//-
 
 //-Structs
 typedef	struct NeuralNet
 {
 	struct
 	{
-		float** Inputs; //[pattern][input]
-		float** Targets; //[pattern][target]
+		uint* IndexArray;
+		double** Inputs; //[pattern][input]
+		double** Targets; //[pattern][target]
 		uint PatternCount;
 	}Patterns;
 	struct
 	{
 		struct  //Input - Hidden Weights
 		{
-			float** Weight; //[input][hidden]
+			double** Weight; //[input][hidden]
 		}IH;
 		struct  // Hidden - Output Weights
 		{
-			float** Weight; //[output][hidden]
+			double** Weight; //[output][hidden]
 		}HO;
 	}Weights;
 	struct 
 	{
 		struct
 		{
-			float** Hidden; //[pattern][hidden]
-			float** Output; //[pattern][output]
+			double** Hidden; //[pattern][hidden]
+			double** Output; //[pattern][output]
+			double* UHidden; //[hidden]
+			double* UOutput; //[output]
 		}Sum;
 		struct 
 		{
-			float** Hidden; //[pattern][hidden]
-			float** Output; //[pattern][output]
+			double** Hidden; //[pattern][hidden]
+			double** Output; //[pattern][output]
+			double* UHidden; //[hidden]
 		}Values;
 	}Points;
 	struct
 	{
-		float* Hidden; //[hidden]
-		float* Output; //[output]
-		float* SumOutputWeight; //[hidden]
-		float** WeightIH; //[input][hidden]
-		float** WeightHO; //[output][hidden]
+		double* Hidden; //[hidden]
+		double* Output; //[output]
+		double* SumOutputWeight; //[hidden]
+		double** WeightIH; //[input][hidden]
+		double** WeightHO; //[output][hidden]
 	}Deltas; //
 	struct 
 	{
-		float eta, alpha, smallwt;
+		double eta; //learning rate
+		double alpha; //learning momentum
+		double smallwt, bias;
 		struct { uint Icount, Hcount, Ocount; }NeuronCount;
 	}Settings;
 }NeuralNet;
@@ -70,19 +69,28 @@ typedef	struct NeuralNet
 //-Methods
 
 //Setup Network & nodes. (minimum of 1)
-void NeuralNet_Construct(NeuralNet* _nnet, uint _InputCount, uint _hiddenCount, uint _OutputCount, float _eta, float _alpha, float _smallwt, NeuralNet_WH_type _whtype);
-void NeuralNet_Destruct(NeuralNet* _nnet);
+NeuralNet* NeuralNet_create(uint _InputCount, uint _hiddenCount, uint _OutputCount, double _eta, double _alpha, double _smallwt, double _bias);
+void NeuralNet_destroy(NeuralNet* _nnet);
 
 /*Adds a new training pair to Training vector.
 * input & output values copied internally
 */
-void NeuralNet_addTrainingPattern(NeuralNet* _nnet, float* inputs, float* outputs);
+void NeuralNet_addTrainingPattern(NeuralNet* _nnet, double* inputs, double* outputs);
 
 //Visszatér az utolsó epoch error - értékével.
-float NeuralNet_doEpoch(NeuralNet* _nnet, uint _times);
+double NeuralNet_doEpoch(NeuralNet* _nnet, uint _times);
 
-//Visszatér a jelenlegi Súlyok neurális kimenetével.
-float* NeuralNet_getOutputActivation(NeuralNet* _nnet, float* _inputs);
+/*Vissza írja a jelenlegi Súlyok neurális kimenetét.
+* _inputs & _outputs should be matched with NN IO count.
+* _output will be updated with NN Activation values.
+*/
+void NeuralNet_getOutputActivation(NeuralNet* _nnet, double* _inputs, double *_outputs);
+
+
+/*
+	Reinitializes, all weights with random values.
+*/
+void NeuralNet_reRandomizeWeights(NeuralNet* _nnet);
 
 //-
 
